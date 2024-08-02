@@ -3,6 +3,7 @@ import { UsersService } from './../../users/services/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from './../../users/models/user.entity';
 import { CreateUserDto } from '../controllers/dto/create-user.dto';
+import { AssignRoleDto } from '../controllers/dto/assign-role.dto';
 
 @Injectable()
 export class AuthService {
@@ -41,5 +42,10 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async assignRole(assignRoleDto: AssignRoleDto) {
+    const { userId, role } = assignRoleDto;
+    return this.usersService.updateRole(userId, role);
   }
 }

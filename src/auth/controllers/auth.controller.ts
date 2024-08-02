@@ -12,7 +12,9 @@ import { LocalAuthGuard } from './../guards/local-auth.guard';
 import { AuthService } from './../services/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-
+import { Permissions } from '../guards/permissions.decorator';
+import { PermissionsGuard } from '../guards/permissions.guard';
+import { AssignRoleDto } from './dto/assign-role.dto';
 @ApiTags('Auth')
 @Controller('api/auth')
 export class AuthController {
@@ -81,5 +83,12 @@ export class AuthController {
   })
   async login(@Req() req) {
     return this.authService.login(req.user);
+  }
+
+  @Post('assign-role')
+  @Permissions('assign_role')
+  @UseGuards(PermissionsGuard)
+  async assignRole(@Body() assignRoleDto: AssignRoleDto) {
+    return this.authService.assignRole(assignRoleDto);
   }
 }
