@@ -40,6 +40,9 @@ export class UsersService {
     const role = await this.rolesRepository.findOne({
       where: { name: roleName },
     });
+    if (!user.roles) {
+      user.roles = [];
+    }
     user.roles = [role];
     return this.repository.save(user);
   }

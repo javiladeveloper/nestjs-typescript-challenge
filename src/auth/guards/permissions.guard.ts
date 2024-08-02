@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from './permissions.decorator';
 import { User } from '../../users/models/user.entity';
@@ -15,7 +20,13 @@ export class PermissionsGuard implements CanActivate {
     if (!requiredPermissions) {
       return true;
     }
-    const { user }: { user: User } = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest();
+    const user: User = request.user;
+
+    if (!user || !user.roles) {
+      throw new UnauthorizedException('User does not have roles assigned');
+    }
+
     return requiredPermissions.some((permission) =>
       user.roles.some((role) =>
         role.permissions.map((p) => p.name).includes(permission),
