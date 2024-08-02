@@ -139,3 +139,60 @@ ALTER TABLE `users`
 ALTER TABLE `users`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 SET FOREIGN_KEY_CHECKS=1;
+
+CREATE TABLE IF NOT EXISTS roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+INSERT INTO roles (name) VALUES ('admin');
+INSERT INTO roles (name) VALUES ('agent');
+INSERT INTO roles (name) VALUES ('customer');
+INSERT INTO roles (name) VALUES ('guest');
+
+-- Crear tabla de permisos
+CREATE TABLE IF NOT EXISTS permissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+INSERT INTO permissions (name) VALUES ('create_agent');
+INSERT INTO permissions (name) VALUES ('read_agent');
+INSERT INTO permissions (name) VALUES ('update_agent');
+INSERT INTO permissions (name) VALUES ('delete_agent');
+INSERT INTO permissions (name) VALUES ('create_customer');
+INSERT INTO permissions (name) VALUES ('read_customer');
+INSERT INTO permissions (name) VALUES ('update_customer');
+INSERT INTO permissions (name) VALUES ('delete_customer');
+INSERT INTO permissions (name) VALUES ('create_order');
+INSERT INTO permissions (name) VALUES ('read_order');
+INSERT INTO permissions (name) VALUES ('update_order');
+INSERT INTO permissions (name) VALUES ('delete_order');
+
+-- Crear tabla intermedia para usuarios y roles
+CREATE TABLE IF NOT EXISTS user_roles_role (
+    userId INT NOT NULL,
+    roleId INT NOT NULL,
+    PRIMARY KEY (userId, roleId),
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (roleId) REFERENCES roles(id) ON DELETE CASCADE
+);
+
+-- Crear tabla intermedia para roles y permisos
+CREATE TABLE IF NOT EXISTS role_permissions_permission (
+    roleId INT NOT NULL,
+    permissionId INT NOT NULL,
+    PRIMARY KEY (roleId, permissionId),
+    FOREIGN KEY (roleId) REFERENCES roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (permissionId) REFERENCES permissions(id) ON DELETE CASCADE
+);
+
+-- Asignar permisos a roles
+-- Admin
+INSERT INTO role_permissions_permission (roleId, permissionId) SELECT (SELECT id FROM roles WHERE name='admin'), id FROM permissions;
+
+-- Agent
+INSERT INTO role_permissions_permission (roleId, permissionId) SELECT (SELECT id FROM roles WHERE name='agent'), id FROM permissions WHERE name LIKE '%_agent' OR name LIKE '%_order';
+
+-- Customer
+INSERT INTO role_permissions_permission (roleId, permissionId) SELECT (SELECT id FROM roles WHERE name='customer'), id FROM permissions WHERE name LIKE '%_customer' OR name LIKE '%_order';
