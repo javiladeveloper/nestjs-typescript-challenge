@@ -5,7 +5,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Role } from '../../roles/models/role.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -65,4 +68,8 @@ export class User {
     default: null,
   })
   deletedAt: Date;
+
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable()
+  roles: Role[];
 }
