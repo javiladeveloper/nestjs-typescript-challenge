@@ -70,6 +70,16 @@ export class User {
   deletedAt: Date;
 
   @ManyToMany(() => Role, (role) => role.users)
-  @JoinTable()
+  @JoinTable({
+    name: 'user_roles_role', // Nombre de la tabla intermedia
+    joinColumn: {
+      name: 'userId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'roleId',
+      referencedColumnName: 'id',
+    },
+  })
   roles: Role[];
 }

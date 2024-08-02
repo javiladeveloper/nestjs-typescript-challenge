@@ -15,6 +15,8 @@ import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Permissions } from '../guards/permissions.decorator';
 import { PermissionsGuard } from '../guards/permissions.guard';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+
 @ApiTags('Auth')
 @Controller('api/auth')
 export class AuthController {
@@ -86,6 +88,7 @@ export class AuthController {
   }
 
   @Post('assign-role')
+  @UseGuards(JwtAuthGuard)
   @Permissions('assign_role')
   @UseGuards(PermissionsGuard)
   async assignRole(@Body() assignRoleDto: AssignRoleDto) {
