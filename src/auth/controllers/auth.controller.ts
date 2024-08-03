@@ -20,7 +20,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 @ApiTags('Auth')
 @Controller('api/auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @HttpCode(201)
@@ -92,6 +92,7 @@ export class AuthController {
   @Permissions('assign_role')
   @UseGuards(PermissionsGuard)
   async assignRole(@Body() assignRoleDto: AssignRoleDto) {
+    console.log('assignRoleDto:', assignRoleDto);
     return this.authService.assignRole(assignRoleDto);
   }
 }

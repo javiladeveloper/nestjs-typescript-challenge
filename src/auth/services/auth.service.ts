@@ -12,11 +12,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUserLocal(email: string, password: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<any> {
     const user: User = await this.usersService.findOneByEmail(email);
     if (
       user &&
-      (await this.usersService.comparePassword(password, user.password))
+      (await this.usersService.comparePassword(pass, user.password))
     ) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
@@ -26,14 +26,18 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { userId: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email };
+    const token = this.jwtService.sign(payload);
+    console.log('Generated JWT token:', token);
+    console.log('Payload:', payload);
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: token,
     };
   }
 
-  async userExists(email: string) {
-    return await this.usersService.findOneByEmail(email);
+  async userExists(email: string): Promise<boolean> {
+    const user = await this.usersService.findOneByEmail(email);
+    return !!user;
   }
 
   async createUser(userDto: CreateUserDto) {
@@ -44,8 +48,10 @@ export class AuthService {
     };
   }
 
-  async assignRole(assignRoleDto: AssignRoleDto) {
-    const { userId, role } = assignRoleDto;
-    return this.usersService.updateRole(userId, role);
+  async assignRole(assignRoleDto: AssignRoleDto): Promise<User> {
+    return this.usersService.updateRole(
+      assignRoleDto.userId,
+      assignRoleDto.roleName,
+    );
   }
 }

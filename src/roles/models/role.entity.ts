@@ -8,7 +8,7 @@ import {
 import { Permission } from '../../permissions/models/permission.entity';
 import { User } from '../../users/models/user.entity';
 
-@Entity('roles') // Asegúrate de que el nombre de la tabla es 'roles'
+@Entity('roles')
 export class Role {
   @PrimaryGeneratedColumn()
   id: number;
@@ -18,7 +18,7 @@ export class Role {
 
   @ManyToMany(() => Permission, (permission) => permission.roles)
   @JoinTable({
-    name: 'role_permissions_permission', // Nombre de la tabla intermedia
+    name: 'role_permissions_permission',
     joinColumn: {
       name: 'roleId',
       referencedColumnName: 'id',
@@ -31,16 +31,5 @@ export class Role {
   permissions: Permission[];
 
   @ManyToMany(() => User, (user) => user.roles)
-  @JoinTable({
-    name: 'user_roles_role', // Nombre de la tabla intermedia
-    joinColumn: {
-      name: 'roleId',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'userId',
-      referencedColumnName: 'id',
-    },
-  })
   users: User[];
 }

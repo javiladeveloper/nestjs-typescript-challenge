@@ -9,43 +9,61 @@ import { Role } from '../../roles/models/role.entity';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private repository: Repository<User>,
+    @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
   ) {}
 
   async findOneByEmail(email: string): Promise<User | undefined> {
-    return this.repository.findOne({
+    return this.usersRepository.findOne({
       where: {
         email,
       },
     });
   }
 
+  async findOneById(userId: number): Promise<User> {
+    console.log(userId);
+    return this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['roles', 'roles.permissions'],
+    });
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     createUserDto.password = await this.encryptPassword(createUserDto.password);
-    const user: User = this.repository.create(createUserDto);
+    const user = this.usersRepository.create(createUserDto);
     const role = await this.rolesRepository.findOne({
       where: { name: 'guest' },
     });
     user.roles = [role];
-
-    return await this.repository.save(user);
+    return await this.usersRepository.save(user);
   }
+
   async updateRole(userId: number, roleName: string): Promise<User> {
-    const user = await this.repository.findOne({
+    console.log('Received userId:', userId, 'roleName:', roleName);
+
+    const user = await this.usersRepository.findOne({
       where: { id: userId },
       relations: ['roles'],
     });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
     const role = await this.rolesRepository.findOne({
       where: { name: roleName },
     });
-    if (!user.roles) {
-      user.roles = [];
+    if (!role) {
+      throw new Error('Role not found');
     }
+
+    console.log('Updating user role:', userId, 'to role:', roleName);
+
     user.roles = [role];
-    return this.repository.save(user);
+    return this.usersRepository.save(user);
   }
+
   async encryptPassword(password: string) {
     return await bcrypt.hash(password, 10);
   }
