@@ -92,7 +92,6 @@ export class AuthController {
   @Permissions('assign_role')
   @UseGuards(PermissionsGuard)
   async assignRole(@Body() assignRoleDto: AssignRoleDto) {
-    console.log('assignRoleDto:', assignRoleDto);
     return this.authService.assignRole(assignRoleDto);
   }
 }

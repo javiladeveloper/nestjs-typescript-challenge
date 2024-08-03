@@ -26,7 +26,6 @@ export class JwtMiddleware implements NestMiddleware {
 
     try {
       const payload = this.jwtService.verify(token, { secret: 'secretKey' });
-      console.log('Payload:', payload); // Añadir un log para ver el payload
       const user = await this.usersService.findOneById(payload.sub);
       if (!user) {
         throw new UnauthorizedException('User not found');
@@ -34,7 +33,6 @@ export class JwtMiddleware implements NestMiddleware {
       req.user = user;
       next();
     } catch (error) {
-      console.log('Error verifying token:', error); // Añadir un log para ver el error
       throw new UnauthorizedException('Invalid token');
     }
   }

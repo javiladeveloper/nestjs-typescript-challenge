@@ -23,7 +23,6 @@ export class UsersService {
   }
 
   async findOneById(userId: number): Promise<User> {
-    console.log(userId);
     return this.usersRepository.findOne({
       where: { id: userId },
       relations: ['roles', 'roles.permissions'],
@@ -41,8 +40,6 @@ export class UsersService {
   }
 
   async updateRole(userId: number, roleName: string): Promise<User> {
-    console.log('Received userId:', userId, 'roleName:', roleName);
-
     const user = await this.usersRepository.findOne({
       where: { id: userId },
       relations: ['roles'],
@@ -57,8 +54,6 @@ export class UsersService {
     if (!role) {
       throw new Error('Role not found');
     }
-
-    console.log('Updating user role:', userId, 'to role:', roleName);
 
     user.roles = [role];
     return this.usersRepository.save(user);
