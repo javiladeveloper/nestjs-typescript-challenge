@@ -22,10 +22,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from './../../../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
+import { Permissions } from '../../../auth/guards/permissions.decorator';
 
 @ApiTags('Agents')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('/api/agents')
 export class AgentController {
   constructor(private agentService: AgentService) {}
@@ -56,6 +58,7 @@ export class AgentController {
       ],
     },
   })
+  @Permissions('read_agent')
   async findAll() {
     return this.agentService.findAll();
   }
@@ -101,6 +104,7 @@ export class AgentController {
       },
     },
   })
+  @Permissions('read_agent')
   async findById(@Param('agentCode') agentCode: string) {
     const data = await this.agentService.findOneById(agentCode);
     if (!data) {
@@ -137,6 +141,7 @@ export class AgentController {
       },
     },
   })
+  @Permissions('create_agent')
   async create(@Body() createAgentDto: CreateAgentDto): Promise<Agent> {
     return this.agentService.create(createAgentDto);
   }
@@ -155,6 +160,7 @@ export class AgentController {
       },
     },
   })
+  @Permissions('update_agent')
   async update(
     @Param('agentCode') agentCode: string,
     @Body() updateAgentDto: UpdateAgentDto,
@@ -185,6 +191,7 @@ export class AgentController {
       },
     },
   })
+  @Permissions('delete_agent')
   async delete(@Param('agentCode') agentCode: string): Promise<DeleteResult> {
     return this.agentService.delete(agentCode);
   }

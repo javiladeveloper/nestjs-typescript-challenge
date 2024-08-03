@@ -22,10 +22,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from './../../../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
+import { Permissions } from '../../../auth/guards/permissions.decorator';
 
 @ApiTags('Customers')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('/api/customers')
 export class CustomerController {
   constructor(private customerService: CustomerService) {}
@@ -61,6 +63,7 @@ export class CustomerController {
       ],
     },
   })
+  @Permissions('read_customer')
   async findAll() {
     return this.customerService.findAll();
   }
@@ -104,6 +107,7 @@ export class CustomerController {
       },
     },
   })
+  @Permissions('read_customer')
   async findById(@Param('custCode') custCode: string) {
     const data = await this.customerService.findOneById(custCode);
     if (!data) {
@@ -146,6 +150,7 @@ export class CustomerController {
       },
     },
   })
+  @Permissions('create_customer')
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<Customer> {
@@ -177,6 +182,7 @@ export class CustomerController {
       },
     },
   })
+  @Permissions('update_customer')
   async update(
     @Param('custCode') custCode: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
@@ -207,6 +213,7 @@ export class CustomerController {
       },
     },
   })
+  @Permissions('delete_customer')
   async delete(@Param('custCode') custCode: string): Promise<DeleteResult> {
     return this.customerService.delete(custCode);
   }

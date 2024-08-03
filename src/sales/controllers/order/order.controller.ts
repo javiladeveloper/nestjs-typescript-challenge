@@ -30,10 +30,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from './../../../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
+import { Permissions } from '../../../auth/guards/permissions.decorator';
 
 @ApiTags('Orders')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('/api/orders')
 export class OrderController {
   constructor(private orderService: OrderService) {}
@@ -56,6 +58,7 @@ export class OrderController {
       ],
     },
   })
+  @Permissions('read_order')
   async totalAmoutByCustomer() {
     return await this.orderService.totalAmountByCustomer();
   }
@@ -78,6 +81,7 @@ export class OrderController {
       ],
     },
   })
+  @Permissions('read_order')
   async totalAmoutByAgent() {
     return await this.orderService.totalAmountByAgent();
   }
@@ -100,6 +104,7 @@ export class OrderController {
       ],
     },
   })
+  @Permissions('read_order')
   async totalAmoutByCountry() {
     return await this.orderService.totalAmountByCountry();
   }
@@ -186,6 +191,7 @@ export class OrderController {
       },
     },
   })
+  @Permissions('read_order')
   async findAll(
     @Req() req: Request,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: 1,
@@ -244,6 +250,7 @@ export class OrderController {
       },
     },
   })
+  @Permissions('read_order')
   async findById(@Param('ordNum') ordNum: number) {
     const data = await this.orderService.findOneById(ordNum);
     if (!data) {
@@ -281,6 +288,7 @@ export class OrderController {
       },
     },
   })
+  @Permissions('create_order')
   async create(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
     return this.orderService.create(createOrderDto);
   }
@@ -309,6 +317,7 @@ export class OrderController {
       },
     },
   })
+  @Permissions('update_order')
   async update(
     @Param('ordNum') ordNum: number,
     @Body() updateOrderDto: UpdateOrderDto,
@@ -318,7 +327,6 @@ export class OrderController {
 
   @Delete(':ordNum')
   @ApiOperation({ summary: 'Delete an existing order by its ordNum' })
-  @ApiOperation({ summary: 'Delete an existing customer by its custCode' })
   @ApiResponse({
     status: 200,
     description: 'Order successfully deleted',
@@ -340,6 +348,7 @@ export class OrderController {
       },
     },
   })
+  @Permissions('delete_order')
   async delete(@Param('ordNum') ordNum: number): Promise<DeleteResult> {
     return this.orderService.delete(ordNum);
   }

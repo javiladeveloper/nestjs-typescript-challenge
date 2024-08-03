@@ -23,27 +23,17 @@ export class PermissionsGuard implements CanActivate {
     if (!requiredPermissions) {
       return true;
     }
+
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    console.log('User object in PermissionsGuard:', user);
 
     if (!user) {
-      console.log('PermissionsGuard: User is undefined');
       throw new UnauthorizedException('User is undefined');
     }
 
     const userEntity = await this.usersService.findOneById(user.id);
-    if (!userEntity) {
-      console.log('PermissionsGuard: User not found in database', user);
-      throw new UnauthorizedException('User not found in database');
-    }
 
-    console.log('User entity in PermissionsGuard:', userEntity);
-    if (!userEntity.roles) {
-      console.log(
-        'PermissionsGuard: User does not have roles assigned',
-        userEntity,
-      );
+    if (!userEntity.roles || userEntity.roles.length === 0) {
       throw new UnauthorizedException('User does not have roles assigned');
     }
 
@@ -54,10 +44,6 @@ export class PermissionsGuard implements CanActivate {
     );
 
     if (!hasPermission) {
-      console.log(
-        'PermissionsGuard: User does not have the required permissions',
-        userEntity,
-      );
       throw new UnauthorizedException(
         'User does not have the required permissions',
       );
