@@ -42,14 +42,19 @@ export class AuthService {
     const user: User = await this.usersService.create(userDto);
     const payload = { userId: user.id, email: user.email };
     return {
+      user_id: payload.userId,
       access_token: this.jwtService.sign(payload),
     };
   }
 
-  async assignRole(assignRoleDto: AssignRoleDto): Promise<User> {
-    return this.usersService.updateRole(
+  async assignRole(assignRoleDto: AssignRoleDto) {
+    const user: User = await this.usersService.updateRole(
       assignRoleDto.userId,
       assignRoleDto.roleName,
     );
+    return {
+      user_id: user.id,
+      new_role: user.roles[0].name,
+    };
   }
 }

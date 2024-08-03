@@ -58,6 +58,16 @@ export class OrderController {
       ],
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('read_order')
   async totalAmoutByCustomer() {
     return await this.orderService.totalAmountByCustomer();
@@ -81,6 +91,16 @@ export class OrderController {
       ],
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('read_order')
   async totalAmoutByAgent() {
     return await this.orderService.totalAmountByAgent();
@@ -102,6 +122,16 @@ export class OrderController {
           totalOrdAmount: '9500.00',
         },
       ],
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
     },
   })
   @Permissions('read_order')
@@ -191,6 +221,16 @@ export class OrderController {
       },
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('read_order')
   async findAll(
     @Req() req: Request,
@@ -250,6 +290,16 @@ export class OrderController {
       },
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('read_order')
   async findById(@Param('ordNum') ordNum: number) {
     const data = await this.orderService.findOneById(ordNum);
@@ -288,6 +338,16 @@ export class OrderController {
       },
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('create_order')
   async create(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
     return this.orderService.create(createOrderDto);
@@ -314,6 +374,16 @@ export class OrderController {
         statusCode: 400,
         message: ['ordAmount must be a number string.'],
         error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
       },
     },
   })
@@ -345,6 +415,16 @@ export class OrderController {
       example: {
         statusCode: 500,
         message: 'Internal server error',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
       },
     },
   })

@@ -29,6 +29,7 @@ export class AuthController {
     description: 'Register a new user',
     schema: {
       example: {
+        user_id: 1,
         access_token:
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5IiwiZW1haWwiOiJlbWFpbEBkZW1vLmNvbSIsImlhdCI6MTY1MjA0NzQzNSwiZXhwIjoxNjUyMTMzODM1fQ.ikFigJQn1ttuPAV06Yjr4PL6lKvm_HMygcTU8N1P__0',
       },
@@ -91,6 +92,55 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Permissions('assign_role')
   @UseGuards(PermissionsGuard)
+  @HttpCode(201)
+  @ApiBody({
+    schema: {
+      example: {
+        userId: 'string',
+        role: 'string',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Role assigned successfully',
+    schema: {
+      example: {
+        user_id: '7',
+        new_role: 'agent',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'USER_NOT_FOUND',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Role not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'ROLE_NOT_FOUND',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   async assignRole(@Body() assignRoleDto: AssignRoleDto) {
     return this.authService.assignRole(assignRoleDto);
   }

@@ -58,6 +58,16 @@ export class AgentController {
       ],
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('read_agent')
   async findAll() {
     return this.agentService.findAll();
@@ -104,6 +114,16 @@ export class AgentController {
       },
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('read_agent')
   async findById(@Param('agentCode') agentCode: string) {
     const data = await this.agentService.findOneById(agentCode);
@@ -141,6 +161,16 @@ export class AgentController {
       },
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('create_agent')
   async create(@Body() createAgentDto: CreateAgentDto): Promise<Agent> {
     return this.agentService.create(createAgentDto);
@@ -157,6 +187,16 @@ export class AgentController {
         generatedMaps: [],
         raw: [],
         affected: 1,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
       },
     },
   })
@@ -188,6 +228,16 @@ export class AgentController {
       example: {
         statusCode: 500,
         message: 'Internal server error',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
       },
     },
   })

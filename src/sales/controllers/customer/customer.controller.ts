@@ -63,6 +63,16 @@ export class CustomerController {
       ],
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('read_customer')
   async findAll() {
     return this.customerService.findAll();
@@ -104,6 +114,16 @@ export class CustomerController {
       example: {
         statusCode: 404,
         message: 'Not Found',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
       },
     },
   })
@@ -150,6 +170,16 @@ export class CustomerController {
       },
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('create_customer')
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
@@ -182,6 +212,16 @@ export class CustomerController {
       },
     },
   })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
+      },
+    },
+  })
   @Permissions('update_customer')
   async update(
     @Param('custCode') custCode: string,
@@ -210,6 +250,16 @@ export class CustomerController {
       example: {
         statusCode: 500,
         message: 'Internal server error',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User does not have the required permissions',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'User does not have the required permissions',
       },
     },
   })

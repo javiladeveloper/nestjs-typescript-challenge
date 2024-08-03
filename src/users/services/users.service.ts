@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../models/user.entity';
@@ -45,14 +45,14 @@ export class UsersService {
       relations: ['roles'],
     });
     if (!user) {
-      throw new Error('User not found');
+      throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
     }
 
     const role = await this.rolesRepository.findOne({
       where: { name: roleName },
     });
     if (!role) {
-      throw new Error('Role not found');
+      throw new HttpException('ROLE_NOT_FOUND', HttpStatus.NOT_FOUND);
     }
 
     user.roles = [role];
