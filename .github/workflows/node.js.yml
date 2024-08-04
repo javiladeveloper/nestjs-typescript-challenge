@@ -56,7 +56,13 @@ jobs:
         id: wait_stack
         run: |
           STACK_NAME=nestjs-typescript-challenge-main
+          set +e  # Continue even if the command fails
           while true; do
+            aws cloudformation describe-stacks --stack-name $STACK_NAME --output text > /dev/null 2>&1
+            if [ $? -ne 0 ]; then
+              echo "Stack does not exist."
+              exit 0
+            fi
             STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].StackStatus' --output text)
             echo "Current stack status: $STACK_STATUS"
             if [[ "$STACK_STATUS" == "CREATE_COMPLETE" || "$STACK_STATUS" == "UPDATE_COMPLETE" || "$STACK_STATUS" == "UPDATE_ROLLBACK_COMPLETE" || "$STACK_STATUS" == "ROLLBACK_COMPLETE" || "$STACK_STATUS" == "DELETE_COMPLETE" ]]; then
@@ -71,10 +77,23 @@ jobs:
           done
 
       - name: Delete CloudFormation stack if in a stuck state
-        if: steps.wait_stack.outputs.status == 'UPDATE_IN_PROGRESS' || steps.wait_stack.outputs.status == 'REVIEW_IN_PROGRESS'
+        if: always()
         run: |
-          aws cloudformation delete-stack --stack-name nestjs-typescript-challenge-main
-          aws cloudformation wait stack-delete-complete --stack-name nestjs-typescript-challenge-main
+          STACK_NAME=nestjs-typescript-challenge-main
+          set +e  # Continue even if the command fails
+          aws cloudformation describe-stacks --stack-name $STACK_NAME --output text > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "Stack does not exist, skipping deletion."
+            exit 0
+          fi
+          STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].StackStatus' --output text)
+          if [[ "$STACK_STATUS" == "UPDATE_IN_PROGRESS" || "$STACK_STATUS" == "REVIEW_IN_PROGRESS" ]]; then
+            echo "Deleting stack due to stuck state..."
+            aws cloudformation delete-stack --stack-name $STACK_NAME
+            aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME
+          fi
 
       - name: Deploy with Serverless
-        run: serverless deploy --stage main
+        run: |
+          sleep 60  # Wait for the stack deletion to be fully processed
+          serverless deploy --stage main
