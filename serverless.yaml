@@ -16,7 +16,7 @@ package:
 
 plugins:
   - serverless-offline
-  - serverless-plugin-aws-alerts@1.7.5
+  - serverless-plugin-aws-alerts
 
 provider:
   name: aws
@@ -24,8 +24,8 @@ provider:
   memorySize: 1024
   timeout: 25
   stage: main
-  region: us-east-1
-  environment:
+  region: us-east-2
+  environment: 
     PORT: ${env:PORT}
     JWT_SECRET: ${env:JWT_SECRET}
     DB_HOST: ${env:DB_HOST}
