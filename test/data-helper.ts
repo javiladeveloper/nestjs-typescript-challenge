@@ -86,3 +86,21 @@ export const userAgent = {
     },
   ],
 };
+
+export const userGuest = {
+  id: '6',
+  firstName: 'maxito',
+  lastName: 'Avila',
+  email: 'maxito@gmail.com',
+  password: '$2a$10$g9kVXtnP9FRysQHwx.4qAuNc9HFw5SNZ7tvIHENiH7ax3v20xWdl6',
+  createAt: '2024-08-03T01:16:40.623Z',
+  updateAt: '2024-08-03T01:16:40.623Z',
+  deletedAt: null,
+  roles: [
+    {
+      roleId: '1',
+      roleName: 'guest',
+      permissions: [],
+    },
+  ],
+};

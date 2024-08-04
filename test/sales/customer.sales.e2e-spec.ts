@@ -12,7 +12,7 @@ import { Order } from '../../src/sales/models/order.entity';
 import { User } from '../../src/users/models/user.entity';
 import { Role } from '../../src/roles/models/role.entity';
 import { Permission } from '../../src/permissions/models/permission.entity';
-import * as helper from '../helper';
+import * as helper from '../data-helper';
 jest.mock('bcryptjs', () => {
   return {
     compare: jest.fn().mockImplementation(() => Promise.resolve(true)),
