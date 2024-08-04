@@ -4,6 +4,11 @@ import { AgentService } from '../../services/agent/agent.service';
 import { AgentController } from './agent.controller';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
+import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
+import { UsersService } from '../../../users/services/users.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from '../../../users/models/user.entity';
+import { Role } from '../../../roles/models/role.entity';
 
 describe('AgentController', () => {
   let agentController: AgentController;
@@ -45,10 +50,22 @@ describe('AgentController', () => {
       ),
   };
 
+  const mockUsersService = {
+    findOne: jest
+      .fn()
+      .mockImplementation((user) => Promise.resolve({ ...user, id: 1 })),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AgentController],
-      providers: [AgentService],
+      providers: [
+        AgentService,
+        PermissionsGuard,
+        { provide: UsersService, useValue: mockUsersService },
+        { provide: getRepositoryToken(User), useValue: {} },
+        { provide: getRepositoryToken(Role), useValue: {} },
+      ],
     })
       .overrideProvider(AgentService)
       .useValue(mockAgentService)

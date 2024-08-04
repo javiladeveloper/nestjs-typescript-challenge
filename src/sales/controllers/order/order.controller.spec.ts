@@ -1,11 +1,15 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Request } from 'express';
-import { Order } from '../../models/order.entity';
 import { OrderService } from '../../services/order/order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderController } from './order.controller';
+import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
+import { UsersService } from '../../../users/services/users.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from '../../../users/models/user.entity';
+import { Role } from '../../../roles/models/role.entity';
 
 describe('OrderController', () => {
   let orderController: OrderController;
@@ -88,10 +92,22 @@ describe('OrderController', () => {
     ),
   };
 
+  const mockUsersService = {
+    findOne: jest
+      .fn()
+      .mockImplementation((user) => Promise.resolve({ ...user, id: 1 })),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OrderController],
-      providers: [OrderService],
+      providers: [
+        OrderService,
+        PermissionsGuard,
+        { provide: UsersService, useValue: mockUsersService },
+        { provide: getRepositoryToken(User), useValue: {} },
+        { provide: getRepositoryToken(Role), useValue: {} },
+      ],
     })
       .overrideProvider(OrderService)
       .useValue(mockOrderService)
@@ -188,7 +204,7 @@ describe('OrderController', () => {
     ]);
   });
 
-  it('should return total amount by countryr', async () => {
+  it('should return total amount by country', async () => {
     expect(await orderController.totalAmoutByCountry()).toEqual([
       {
         custCountry: 'Australia',

@@ -10,6 +10,9 @@ import { Agent } from '../../src/sales/models/agent.entity';
 import { Customer } from '../../src/sales/models/customer.entity';
 import { Order } from '../../src/sales/models/order.entity';
 import { User } from '../../src/users/models/user.entity';
+import { Role } from '../../src/roles/models/role.entity';
+import { Permission } from '../../src/permissions/models/permission.entity';
+import * as helper from '../helper';
 
 jest.mock('bcryptjs', () => {
   return {
@@ -48,11 +51,11 @@ describe('SalesController (e2e)', () => {
 
   const mockCustomerRepository = {};
   const mockOrderRepository = {};
-  const mockUserRepository = {
-    findOne: jest
-      .fn()
-      .mockImplementation((user) => Promise.resolve({ ...user, id: 1 })),
-  };
+  const mockUserRepository = (user) => ({
+    findOne: jest.fn().mockImplementation(() => {
+      return Promise.resolve(user);
+    }),
+  });
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -70,7 +73,11 @@ describe('SalesController (e2e)', () => {
       .overrideProvider(getRepositoryToken(Order))
       .useValue(mockOrderRepository)
       .overrideProvider(getRepositoryToken(User))
-      .useValue(mockUserRepository)
+      .useValue(mockUserRepository(helper.userAdmin))
+      .overrideProvider(getRepositoryToken(Role))
+      .useValue({})
+      .overrideProvider(getRepositoryToken(Permission))
+      .useValue({})
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -87,7 +94,7 @@ describe('SalesController (e2e)', () => {
     const {
       body: { access_token },
     } = await request(app.getHttpServer()).post('/api/auth/login').send({
-      email: 'demo@demo.com',
+      email: 'jonathan.joan.avila@gmail.com',
       password: 'demo',
     });
     return access_token;
@@ -121,7 +128,7 @@ describe('SalesController (e2e)', () => {
       .expect('Content-Type', /application\/json/);
   });
 
-  it('/api/agents (UPDATE)', async () => {
+  it('/api/agents (PATCH)', async () => {
     return request(app.getHttpServer())
       .patch('/api/agents/A001')
       .auth(await getValidToken(), { type: 'bearer' })
@@ -131,7 +138,7 @@ describe('SalesController (e2e)', () => {
       .expect({ agentCode: 'A001', agentName: 'Jhon Smith' });
   });
 
-  it('/api/agents (UPDATE) should fail because invalid parameter', async () => {
+  it('/api/agents (PATCH) should fail because invalid parameter', async () => {
     return request(app.getHttpServer())
       .patch('/api/agents/A001')
       .auth(await getValidToken(), { type: 'bearer' })
@@ -150,5 +157,9 @@ describe('SalesController (e2e)', () => {
         raw: [],
         affected: 1,
       });
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 });

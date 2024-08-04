@@ -11,7 +11,6 @@ import { PermissionsModule } from './permissions/permissions.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
@@ -22,7 +21,6 @@ import { PermissionsModule } from './permissions/permissions.module';
       autoLoadEntities: true,
       synchronize: false,
     }),
-
     SalesModule,
     AuthModule,
     UsersModule,

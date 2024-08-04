@@ -4,9 +4,15 @@ import { CustomerService } from '../../services/customer/customer.service';
 import { CustomerController } from './customer.controller';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
+import { UsersService } from '../../../users/services/users.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from '../../../users/models/user.entity';
+import { Role } from '../../../roles/models/role.entity';
 
 describe('CustomerController', () => {
   let customerController: CustomerController;
+
   const mockCustomerService = {
     findAll: jest
       .fn()
@@ -44,10 +50,22 @@ describe('CustomerController', () => {
       ),
   };
 
+  const mockUsersService = {
+    findOne: jest
+      .fn()
+      .mockImplementation((user) => Promise.resolve({ ...user, id: 1 })),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CustomerController],
-      providers: [CustomerService],
+      providers: [
+        CustomerService,
+        PermissionsGuard,
+        { provide: UsersService, useValue: mockUsersService },
+        { provide: getRepositoryToken(User), useValue: {} },
+        { provide: getRepositoryToken(Role), useValue: {} },
+      ],
     })
       .overrideProvider(CustomerService)
       .useValue(mockCustomerService)

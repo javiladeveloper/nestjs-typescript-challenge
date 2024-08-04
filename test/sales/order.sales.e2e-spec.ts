@@ -10,6 +10,9 @@ import { Agent } from '../../src/sales/models/agent.entity';
 import { Customer } from '../../src/sales/models/customer.entity';
 import { Order } from '../../src/sales/models/order.entity';
 import { User } from '../../src/users/models/user.entity';
+import { Role } from '../../src/roles/models/role.entity';
+import { Permission } from '../../src/permissions/models/permission.entity';
+import * as helper from '../helper';
 
 jest.mock('nestjs-typeorm-paginate', () => ({
   paginate: jest.fn().mockResolvedValue({
@@ -106,11 +109,11 @@ describe('SalesController (e2e)', () => {
 
   const mockAgentRepository = {};
   const mockCustomerRepository = {};
-  const mockUserRepository = {
-    findOne: jest
-      .fn()
-      .mockImplementation((user) => Promise.resolve({ ...user, id: 1 })),
-  };
+  const mockUserRepository = (user) => ({
+    findOne: jest.fn().mockImplementation(() => {
+      return Promise.resolve(user);
+    }),
+  });
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -128,7 +131,11 @@ describe('SalesController (e2e)', () => {
       .overrideProvider(getRepositoryToken(Order))
       .useValue(mockOrderRepository)
       .overrideProvider(getRepositoryToken(User))
-      .useValue(mockUserRepository)
+      .useValue(mockUserRepository(helper.userAdmin))
+      .overrideProvider(getRepositoryToken(Role))
+      .useValue({})
+      .overrideProvider(getRepositoryToken(Permission))
+      .useValue({})
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -145,7 +152,7 @@ describe('SalesController (e2e)', () => {
     const {
       body: { access_token },
     } = await request(app.getHttpServer()).post('/api/auth/login').send({
-      email: 'demo@demo.com',
+      email: 'jonathan.joan.avila@gmail.com',
       password: 'demo',
     });
     return access_token;
@@ -269,5 +276,9 @@ describe('SalesController (e2e)', () => {
           totalOrdAmount: '7700.00',
         },
       ]);
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 });

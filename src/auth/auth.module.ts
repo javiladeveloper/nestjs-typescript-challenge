@@ -8,8 +8,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { PermissionsGuard } from './guards/permissions.guard';
-import { Role } from 'src/roles/models/role.entity';
-import { User } from 'src/users/models/user.entity';
+import { Role } from '../roles/models/role.entity';
+import { User } from '../users/models/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtMiddleware } from './middleware/jwt.middleware';
 

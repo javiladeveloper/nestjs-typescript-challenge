@@ -168,6 +168,10 @@ INSERT INTO permissions (name) VALUES ('create_order');
 INSERT INTO permissions (name) VALUES ('read_order');
 INSERT INTO permissions (name) VALUES ('update_order');
 INSERT INTO permissions (name) VALUES ('delete_order');
+INSERT INTO permissions (name) VALUES ('assign_role');
+INSERT INTO permissions (name) VALUES ('create_user');
+INSERT INTO permissions (name) VALUES ('update_user');
+INSERT INTO permissions (name) VALUES ('delete_user');
 
 -- Crear tabla intermedia para usuarios y roles
 CREATE TABLE IF NOT EXISTS user_roles_role (
