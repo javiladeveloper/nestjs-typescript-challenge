@@ -52,15 +52,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      - name: Check CloudFormation stack status
-        id: stack_status
+      - name: Wait for CloudFormation stack to be stable
+        id: wait_stack
         run: |
-          STACK_STATUS=$(aws cloudformation describe-stacks --stack-name nestjs-typescript-challenge-main --query 'Stacks[0].StackStatus' --output text)
-          echo "Stack status: $STACK_STATUS"
-          echo "::set-output name=status::$STACK_STATUS"
+          STACK_NAME=nestjs-typescript-challenge-main
+          while true; do
+            STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].StackStatus' --output text)
+            echo "Current stack status: $STACK_STATUS"
+            if [[ "$STACK_STATUS" == "CREATE_COMPLETE" || "$STACK_STATUS" == "UPDATE_COMPLETE" || "$STACK_STATUS" == "UPDATE_ROLLBACK_COMPLETE" || "$STACK_STATUS" == "ROLLBACK_COMPLETE" || "$STACK_STATUS" == "DELETE_COMPLETE" ]]; then
+              break
+            elif [[ "$STACK_STATUS" == "UPDATE_IN_PROGRESS" || "$STACK_STATUS" == "CREATE_IN_PROGRESS" || "$STACK_STATUS" == "ROLLBACK_IN_PROGRESS" || "$STACK_STATUS" == "DELETE_IN_PROGRESS" ]]; then
+              echo "Stack is in a transient state, waiting..."
+              sleep 20
+            else
+              echo "Stack is in an unexpected state: $STACK_STATUS"
+              exit 1
+            fi
+          done
 
       - name: Delete CloudFormation stack if in a stuck state
-        if: steps.stack_status.outputs.status == 'UPDATE_IN_PROGRESS' || steps.stack_status.outputs.status == 'REVIEW_IN_PROGRESS'
+        if: steps.wait_stack.outputs.status == 'UPDATE_IN_PROGRESS' || steps.wait_stack.outputs.status == 'REVIEW_IN_PROGRESS'
         run: |
           aws cloudformation delete-stack --stack-name nestjs-typescript-challenge-main
           aws cloudformation wait stack-delete-complete --stack-name nestjs-typescript-challenge-main
