@@ -52,5 +52,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
+      - name: Wait for 5 minutes
+        uses: actions/wait@v1
+        with:
+          time: 3m
+
+      - name: Check CloudFormation stack status
+        id: stack_status
+        run: |
+          STATUS=$(aws cloudformation describe-stacks --stack-name nestjs-typescript-challenge-main --query "Stacks[0].StackStatus" --output text)
+          echo "Stack status is $STATUS"
+          if [ "$STATUS" != "UPDATE_COMPLETE" ]; then
+            echo "Stack is not in a stable state, exiting"
+            exit 1
+          fi
+
       - name: Deploy with Serverless
         run: serverless deploy --stage main
