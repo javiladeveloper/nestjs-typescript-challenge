@@ -53,9 +53,7 @@ jobs:
           aws-region: us-east-2
 
       - name: Wait for 5 minutes
-        uses: actions/wait@v1
-        with:
-          time: 3m
+        run: sleep 180
 
       - name: Check CloudFormation stack status
         id: stack_status
