@@ -14,12 +14,13 @@ package:
     - 'node_modules/**/*.e2e.ts'
 plugins:
   - serverless-offline
+
 provider:
   name: aws
   runtime: nodejs18.x
   memorySize: 1024 
   timeout: 29 
-  stage: ${opt:stage, 'dev'}
+  stage: dev
   region: us-east-2
   environment: 
     PORT: ${env:PORT}
@@ -38,6 +39,58 @@ functions:
           method: ANY
           path: /{proxy+}
 
+resources:
+  Resources:
+    # Crear un log group para la función Lambda
+    MainLogGroup:
+      Type: "AWS::Logs::LogGroup"
+      Properties:
+        LogGroupName: "/aws/lambda/${self:service}-${self:provider.stage}-main"
+        RetentionInDays: 14
+
+    # Crear una métrica de CloudWatch personalizada a partir de los logs
+    MainMetricFilter:
+      Type: "AWS::Logs::MetricFilter"
+      Properties:
+        LogGroupName: "/aws/lambda/${self:service}-${self:provider.stage}-main"
+        FilterPattern: "[timestamp=*Z, request_id=\"*-*\", event]"
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "RBACChallengeJonathanAvila"
+            MetricName: "Evaluation"
+
+    # Crear una alarma de CloudWatch para la métrica personalizada
+    MainMetricAlarm:
+      Type: "AWS::CloudWatch::Alarm"
+      Properties: 
+        AlarmName: "MainFunctionErrorAlarm"
+        AlarmDescription: "Alarm if the main function errors exceed 1 in 5 minutes"
+        Namespace: "RBACChallengeJonathanAvila"
+        MetricName: "Evaluation"
+        Statistic: "Sum"
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 1
+        ComparisonOperator: "GreaterThanOrEqualToThreshold"
+        AlarmActions:
+          - arn:aws:sns:us-east-2:123456789012:YourSNSTopic
+
 custom:
-  optimize:
-    external: ['swagger-ui-dist']
+  alerts:
+    stages:
+      - dev
+    dashboards: true
+    topics:
+      alarm:
+        topic:
+          name: ${self:service}-${self:provider.stage}-alerts-alarm
+          displayName: Alarm notifications for ${self:service}-${self:provider.stage}
+    alarms:
+      - functionErrors
+      - functionThrottles
+      - functionDuration
+    metric:
+      namespace: "RBACChallengeJonathanAvila"
+      metric: "Evaluation"
+      dimensions:
+        FunctionName: "nestjs-typescript-challenge-main-main"
