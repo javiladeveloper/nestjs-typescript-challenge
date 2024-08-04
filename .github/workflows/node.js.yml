@@ -52,16 +52,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      - name: Wait for CloudFormation stack to be stable
-        id: wait_stack
+      - name: Wait for CloudFormation stack to be stable before deploying
+        id: wait_stack_stable
         run: |
           STACK_NAME=nestjs-typescript-challenge-main
-          set +e  # Continue even if the command fails
           while true; do
             aws cloudformation describe-stacks --stack-name $STACK_NAME --output text > /dev/null 2>&1
             if [ $? -ne 0 ]; then
               echo "Stack does not exist."
-              exit 0
+              break
             fi
             STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].StackStatus' --output text)
             echo "Current stack status: $STACK_STATUS"
@@ -76,24 +75,5 @@ jobs:
             fi
           done
 
-      - name: Delete CloudFormation stack if in a stuck state
-        if: always()
-        run: |
-          STACK_NAME=nestjs-typescript-challenge-main
-          set +e  # Continue even if the command fails
-          aws cloudformation describe-stacks --stack-name $STACK_NAME --output text > /dev/null 2>&1
-          if [ $? -ne 0 ]; then
-            echo "Stack does not exist, skipping deletion."
-            exit 0
-          fi
-          STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].StackStatus' --output text)
-          if [[ "$STACK_STATUS" == "UPDATE_IN_PROGRESS" || "$STACK_STATUS" == "REVIEW_IN_PROGRESS" ]]; then
-            echo "Deleting stack due to stuck state..."
-            aws cloudformation delete-stack --stack-name $STACK_NAME
-            aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME
-          fi
-
       - name: Deploy with Serverless
-        run: |
-          sleep 60  # Wait for the stack deletion to be fully processed
-          serverless deploy --stage main
+        run: serverless deploy --stage main
