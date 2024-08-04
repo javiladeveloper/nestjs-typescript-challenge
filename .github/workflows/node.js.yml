@@ -46,15 +46,29 @@ jobs:
         run: npm install -g serverless@3.x
 
       - name: Install serverless plugins
-        run: |
-          npm install --save-dev serverless-plugin-aws-alerts --legacy-peer-deps
+        run: npm install --save-dev serverless-plugin-aws-alerts --legacy-peer-deps
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: us-east-1
+
+      - name: Check and delete CloudFormation stack if necessary
+        run: |
+          STACK_NAME=nestjs-typescript-challenge-main
+          STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].StackStatus" --output text || echo "STACK_DOES_NOT_EXIST")
+          echo "Current stack status: $STACK_STATUS"
+          if [ "$STACK_STATUS" = "UPDATE_ROLLBACK_COMPLETE" ] || [ "$STACK_STATUS" = "UPDATE_ROLLBACK_FAILED" ]; then
+            echo "Deleting stack $STACK_NAME due to failed rollback..."
+            aws cloudformation delete-stack --stack-name $STACK_NAME
+            echo "Waiting for stack deletion to complete..."
+            aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME
+          elif [ "$STACK_STATUS" = "UPDATE_IN_PROGRESS" ]; then
+            echo "Waiting for stack $STACK_NAME to finish updating..."
+            aws cloudformation wait stack-update-complete --stack-name $STACK_NAME
+          fi
 
       - name: Deploy with Serverless
         run: serverless deploy --stage main
