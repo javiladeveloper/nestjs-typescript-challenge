@@ -58,6 +58,7 @@ resources:
           - MetricValue: "1"
             MetricNamespace: "RBACChallengeJonathanAvila"
             MetricName: "Evaluation"
+      DependsOn: MainLogGroup
 
     # Crear una alarma de CloudWatch para la métrica personalizada
     MainMetricAlarm:
@@ -74,6 +75,7 @@ resources:
         ComparisonOperator: "GreaterThanOrEqualToThreshold"
         AlarmActions:
           - arn:aws:sns:us-east-2:123456789012:YourSNSTopic
+      DependsOn: MainMetricFilter
 
 custom:
   alerts:
