@@ -56,4 +56,11 @@ jobs:
         run: serverless remove --stage main || true
 
       - name: Deploy with Serverless
-        run: serverless deploy --stage main
+        run: |
+          serverless deploy --stage main
+          sleep 60 # Espera 60 segundos para permitir que CloudFormation termine
+
+      - name: Confirm deployment
+        run: |
+          aws cloudformation wait stack-create-complete --stack-name nestjs-typescript-challenge-main
+          aws cloudformation wait stack-update-complete --stack-name nestjs-typescript-challenge-main
