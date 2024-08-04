@@ -3,25 +3,29 @@ service: nestjs-typescript-challenge
 frameworkVersion: "3"
 
 useDotenv: true
+
 package:
   individually: true
   exclude:
-  - '**/test/**'
-  - '**/*.spec.ts'
-  - '**/*.e2e.ts'
-  - '**/e2e/**'
-  - 'node_modules/**/test/**'
-  - 'node_modules/**/*.e2e.ts'
+    - '**/test/**'
+    - '**/*.spec.ts'
+    - '**/*.e2e.ts'
+    - '**/e2e/**'
+    - 'node_modules/**/test/**'
+    - 'node_modules/**/*.e2e.ts'
+
 plugins:
   - serverless-offline
+  - serverless-plugin-aws-alerts@1.7.5
+
 provider:
   name: aws
   runtime: nodejs18.x
-  memorySize: 1024 # optional, in MB, default is 1024
-  timeout: 25 # optional, in seconds, default is 6
-  stage: dev
-  region: us-east-2
-  environment: 
+  memorySize: 1024
+  timeout: 25
+  stage: main
+  region: us-east-1
+  environment:
     PORT: ${env:PORT}
     JWT_SECRET: ${env:JWT_SECRET}
     DB_HOST: ${env:DB_HOST}
@@ -39,5 +43,28 @@ functions:
           path: /{proxy+}
 
 custom:
-  optimize:
-    external: ['swagger-ui-dist']
+  alerts:
+    stages:
+      - main
+    topics:
+      alarm:
+        topic: ${self:service}-${opt:stage}-alerts
+    alarms:
+      - name: "FunctionErrors"
+        description: "Alert if any of the functions are throwing errors"
+        metric: Errors
+        threshold: 1
+        statistic: Sum
+        period: 300
+        evaluationPeriods: 1
+        comparisonOperator: GreaterThanOrEqualToThreshold
+        treatMissingData: notBreaching
+      - name: "FunctionDuration"
+        description: "Alert if function duration exceeds threshold"
+        metric: Duration
+        threshold: 1000
+        statistic: Average
+        period: 300
+        evaluationPeriods: 1
+        comparisonOperator: GreaterThanOrEqualToThreshold
+        treatMissingData: notBreaching
