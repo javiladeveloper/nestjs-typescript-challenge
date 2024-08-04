@@ -53,14 +53,20 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.REGION }}
+          aws-region: us-east-1
 
       - name: Check and delete CloudFormation stack if necessary
         run: |
           STACK_NAME=nestjs-typescript-challenge-main
           STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].StackStatus" --output text || echo "STACK_DOES_NOT_EXIST")
           echo "Current stack status: $STACK_STATUS"
-          if [ "$STACK_STATUS" = "UPDATE_ROLLBACK_COMPLETE" ] || [ "$STACK_STATUS" = "UPDATE_ROLLBACK_FAILED" ]; then
+          if [ "$STACK_STATUS" = "DELETE_FAILED" ]; then
+            echo "Stack $STACK_NAME deletion failed previously. Attempting to force delete..."
+            aws cloudformation update-termination-protection --stack-name $STACK_NAME --no-enable-termination-protection
+            aws cloudformation delete-stack --stack-name $STACK_NAME
+            echo "Waiting for stack deletion to complete..."
+            aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME
+          elif [ "$STACK_STATUS" = "UPDATE_ROLLBACK_COMPLETE" ] || [ "$STACK_STATUS" = "UPDATE_ROLLBACK_FAILED" ]; then
             echo "Deleting stack $STACK_NAME due to failed rollback..."
             aws cloudformation delete-stack --stack-name $STACK_NAME
             echo "Waiting for stack deletion to complete..."
