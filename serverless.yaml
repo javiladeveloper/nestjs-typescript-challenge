@@ -18,7 +18,7 @@ provider:
   name: aws
   runtime: nodejs18.x
   memorySize: 1024 
-  timeout: 15 
+  timeout: 29 
   stage: dev
   region: us-east-2
   environment: 
