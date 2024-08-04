@@ -33,7 +33,7 @@ jobs:
           echo "DB_PASS=${{ secrets.DB_PASS }}" >> $GITHUB_ENV
           echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> $GITHUB_ENV
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - run: npm run test
       - run: npm run test:e2e
 
