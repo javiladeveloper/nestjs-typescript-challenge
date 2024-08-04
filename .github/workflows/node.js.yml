@@ -9,10 +9,10 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
-    - name: Set environment variables
+
+    - name: Load environment variables
       run: |
         echo "PORT=3000" >> $GITHUB_ENV
         echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
@@ -21,20 +21,16 @@ jobs:
         echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
         echo "DB_PASS=${{ secrets.DB_PASS }}" >> $GITHUB_ENV
         echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> $GITHUB_ENV
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: 18.x
         cache: 'npm'
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Run tests
-      run: npm run test
-
-    - name: Run e2e tests
-      run: npm run test:e2e
+    - run: npm install
+    - run: npm run test
+    - run: npm run test:e2e
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,7 +39,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set environment variables
+    - name: Load environment variables
       run: |
         echo "PORT=3000" >> $GITHUB_ENV
         echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
@@ -65,8 +61,7 @@ jobs:
       with:
         node-version: '16.x'
 
-    - name: Install dependencies
-      run: npm install
+    - run: npm install
 
     - name: Deploy to AWS Lambda
       run: |
@@ -81,11 +76,11 @@ jobs:
           # If the function exists, update the code
           aws lambda update-function-code --function-name $FUNCTION_NAME --zip-file fileb://$ZIP_FILE
         else
-          # If the function does not exist, create it
+          # If the function does not exist, create it with the specified role
           aws lambda create-function \
             --function-name $FUNCTION_NAME \
             --runtime nodejs16.x \
-            --role arn:aws:iam::<your-account-id>:role/<your-lambda-role> \
             --handler index.handler \
-            --zip-file fileb://$ZIP_FILE
+            --zip-file fileb://$ZIP_FILE \
+            --role ${{ secrets.AWS_ROLE_ARN }}
         fi
