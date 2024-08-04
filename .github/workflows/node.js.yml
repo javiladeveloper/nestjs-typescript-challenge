@@ -52,15 +52,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Remove existing stack (if any)
-        run: serverless remove --stage main || true
+      # - name: Remove existing stack (if any)
+      #   run: serverless remove --stage main || true
+
+      - name: Wait for CloudFormation stack to be ready
+        run: |
+          STACK_NAME=nestjs-typescript-challenge-main
+          while true; do
+            STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].StackStatus" --output text)
+            if [ "$STATUS" == "CREATE_COMPLETE" ] || [ "$STATUS" == "UPDATE_COMPLETE" ] || [ "$STATUS" == "DELETE_COMPLETE" ] || [ "$STATUS" == "ROLLBACK_COMPLETE" ]; then
+              break
+            fi
+            echo "Stack status is $STATUS. Waiting..."
+            sleep 30
+          done
 
       - name: Deploy with Serverless
-        run: |
-          serverless deploy --stage main
-          sleep 60 # Espera 60 segundos para permitir que CloudFormation termine
-
-      - name: Confirm deployment
-        run: |
-          aws cloudformation wait stack-create-complete --stack-name nestjs-typescript-challenge-main
-          aws cloudformation wait stack-update-complete --stack-name nestjs-typescript-challenge-main
+        run: serverless deploy --stage main
