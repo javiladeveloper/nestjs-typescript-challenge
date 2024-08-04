@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from './permissions.decorator';
@@ -10,6 +11,8 @@ import { UsersService } from '../../users/services/users.service';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
+  private readonly logger = new Logger(PermissionsGuard.name);
+
   constructor(
     private reflector: Reflector,
     private usersService: UsersService,
@@ -28,12 +31,14 @@ export class PermissionsGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
+      this.logger.warn('User is undefined');
       throw new UnauthorizedException('User is undefined');
     }
 
     const userEntity = await this.usersService.findOneById(user.id);
 
     if (!userEntity.roles || userEntity.roles.length === 0) {
+      this.logger.warn(`User ${user.email} does not have roles assigned`);
       throw new UnauthorizedException('User does not have roles assigned');
     }
 
@@ -44,11 +49,15 @@ export class PermissionsGuard implements CanActivate {
     );
 
     if (!hasPermission) {
+      this.logger.warn(
+        `User ${user.email} does not have the required permissions`,
+      );
       throw new UnauthorizedException(
         'User does not have the required permissions',
       );
     }
 
+    this.logger.log(`User ${user.email} has the required permissions`);
     return true;
   }
 }
