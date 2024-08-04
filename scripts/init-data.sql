@@ -1,4 +1,9 @@
+-- Verificar ejecución del archivo SQL
+SELECT 'init-data.sql script running' AS status;
+
 CREATE DATABASE IF NOT EXISTS sales;
+
+USE sales;
 
 SET FOREIGN_KEY_CHECKS=0;
 
@@ -138,7 +143,6 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `IDX_97672ac88f789774dd47f7c8be` (`email`);
 ALTER TABLE `users`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-SET FOREIGN_KEY_CHECKS=1;
 
 CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -175,7 +179,7 @@ INSERT INTO permissions (name) VALUES ('delete_user');
 
 -- Crear tabla intermedia para usuarios y roles
 CREATE TABLE IF NOT EXISTS user_roles_role (
-    userId INT NOT NULL,
+    userId BIGINT(20) NOT NULL,
     roleId INT NOT NULL,
     PRIMARY KEY (userId, roleId),
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
@@ -200,3 +204,13 @@ INSERT INTO role_permissions_permission (roleId, permissionId) SELECT (SELECT id
 
 -- Customer
 INSERT INTO role_permissions_permission (roleId, permissionId) SELECT (SELECT id FROM roles WHERE name='customer'), id FROM permissions WHERE name LIKE '%_customer' OR name LIKE '%_order';
+
+-- Crear usuario jonathan con el rol de admin
+INSERT INTO users (id, first_name, last_name, email, password, created_at, updated_at) VALUES 
+(1, 'jonathan', 'avila', 'jonathan.joan.avila@gmail.com', '$2a$10$YqSMZMt6T78JUWjvyp9gpOx3KbhuA6bRDEItUqNT1A5NyDAWhiMAi', '2024-08-01 20:49:01.159270', '2024-08-01 20:49:01.159270');
+
+-- Asignar rol de admin al usuario jonathan
+INSERT INTO user_roles_role (userId, roleId) VALUES 
+(1, (SELECT id FROM roles WHERE name='admin'));
+
+SET FOREIGN_KEY_CHECKS=1;

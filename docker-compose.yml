@@ -2,13 +2,22 @@ version: '3.7'
 
 services:
   app:
-    image: node:18
-    command: 'npm run start'
+    build: .
     ports:
       - '3000:3000'
     working_dir: '/app'
     volumes:
       - './:/app'
+    environment:
+      - PORT=3000
+      - JWT_SECRET=secretKey
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=user
+      - DB_PASS=password
+      - DB_DATABASE=sales
+    depends_on:
+      - mysql
 
   mysql:
     image: mysql:5.7
@@ -18,7 +27,6 @@ services:
       - '3306:3306'
     volumes:
       - 'challenge-nodejs-typescript:/var/lib/mysql'
-      #copy sql script to ceate schemma, tables and demo data
       - ./scripts/init-data.sql:/docker-entrypoint-initdb.d/init-data.sql
 
 volumes:
