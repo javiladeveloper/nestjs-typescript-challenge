@@ -50,30 +50,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
-
-      - name: Wait for CloudFormation stack to be stable before deploying
-        id: wait_stack_stable
-        run: |
-          STACK_NAME=nestjs-typescript-challenge-main
-          while true; do
-            aws cloudformation describe-stacks --stack-name $STACK_NAME --output text > /dev/null 2>&1
-            if [ $? -ne 0 ]; then
-              echo "Stack does not exist."
-              break
-            fi
-            STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].StackStatus' --output text)
-            echo "Current stack status: $STACK_STATUS"
-            if [[ "$STACK_STATUS" == "CREATE_COMPLETE" || "$STACK_STATUS" == "UPDATE_COMPLETE" || "$STACK_STATUS" == "UPDATE_ROLLBACK_COMPLETE" || "$STACK_STATUS" == "ROLLBACK_COMPLETE" || "$STACK_STATUS" == "DELETE_COMPLETE" ]]; then
-              break
-            elif [[ "$STACK_STATUS" == "UPDATE_IN_PROGRESS" || "$STACK_STATUS" == "CREATE_IN_PROGRESS" || "$STACK_STATUS" == "ROLLBACK_IN_PROGRESS" || "$STACK_STATUS" == "DELETE_IN_PROGRESS" ]]; then
-              echo "Stack is in a transient state, waiting..."
-              sleep 20
-            else
-              echo "Stack is in an unexpected state: $STACK_STATUS"
-              exit 1
-            fi
-          done
+          aws-region: us-east-1
 
       - name: Deploy with Serverless
         run: serverless deploy --stage main
