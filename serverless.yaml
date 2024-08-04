@@ -3,16 +3,24 @@ service: nestjs-typescript-challenge
 frameworkVersion: "3"
 
 useDotenv: true
-
+package:
+  individually: true
+  exclude:
+  - '**/test/**'
+  - '**/*.spec.ts'
+  - '**/*.e2e.ts'
+  - '**/e2e/**'
+  - 'node_modules/**/test/**'
+  - 'node_modules/**/*.e2e.ts'
 plugins:
   - serverless-offline
 provider:
   name: aws
   runtime: nodejs18.x
   memorySize: 1024 # optional, in MB, default is 1024
-  timeout: 6 # optional, in seconds, default is 6
+  timeout: 25 # optional, in seconds, default is 6
   stage: dev
-  region: us-east-1
+  region: us-east-2
   environment: 
     PORT: ${env:PORT}
     JWT_SECRET: ${env:JWT_SECRET}
