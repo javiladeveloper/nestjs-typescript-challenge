@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, Logger } from '@nestjs/common';
 import { UsersService } from './../../users/services/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -24,7 +25,6 @@ export class AuthService {
       (await this.usersService.comparePassword(pass, user.password))
     ) {
       this.logger.log(`User validated successfully with email: ${email}`);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
       return result;
     }
@@ -51,7 +51,8 @@ export class AuthService {
   }
 
   async createUser(userDto: CreateUserDto) {
-    this.logger.log('Creating a new user', JSON.stringify(userDto));
+    const { password, ...loggableUserDto } = userDto;
+    this.logger.log('Creating a new user', JSON.stringify(loggableUserDto));
     const user: User = await this.usersService.create(userDto);
     const payload = { userId: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
