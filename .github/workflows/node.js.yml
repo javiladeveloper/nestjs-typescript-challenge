@@ -52,8 +52,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # - name: Remove existing stack (if any)
-      #   run: serverless remove --stage main || true
+      - name: Remove existing stack (if any)
+        run: serverless remove --stage main || true
 
       - name: Wait for CloudFormation stack to be ready
         run: |
